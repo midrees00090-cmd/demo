@@ -4393,9 +4393,9 @@
         </div>
     </footer>
 
-    <script>
-    // Mobile menu functionality
-    document.querySelector('.mobile-toggle').addEventListener('click', function() {
+     // Mobile menu functionality - FIXED
+    document.querySelector('.mobile-toggle').addEventListener('click', function(e) {
+        e.stopPropagation();
         const navMenu = document.querySelector('.nav-menu');
         navMenu.classList.toggle('active');
         
@@ -4405,6 +4405,10 @@
             menuIcon.className = 'fas fa-times';
         } else {
             menuIcon.className = 'fas fa-bars';
+            // Close all dropdowns when closing main menu
+            document.querySelectorAll('.dropdown').forEach(item => {
+                item.classList.remove('active');
+            });
         }
     });
 
@@ -4417,6 +4421,10 @@
             if (!navMenu.contains(e.target) && !mobileToggle.contains(e.target)) {
                 navMenu.classList.remove('active');
                 mobileToggle.querySelector('i').className = 'fas fa-bars';
+                // Close all dropdowns
+                document.querySelectorAll('.dropdown').forEach(item => {
+                    item.classList.remove('active');
+                });
             }
         }
     });
@@ -4435,10 +4443,12 @@
             }
         });
         
-        // Mobile dropdown
+        // FIXED: Mobile dropdown - won't close menu
         dropdown.querySelector('a').addEventListener('click', function(e) {
             if (window.innerWidth <= 768) {
                 e.preventDefault();
+                e.stopPropagation(); // KEY FIX: Prevents event from bubbling up
+                
                 const parent = this.parentElement;
                 
                 // Close all other dropdowns
@@ -4450,265 +4460,10 @@
                 
                 // Toggle current dropdown
                 parent.classList.toggle('active');
+                
+                return false; // Prevent any other behavior
             }
         });
     });
-
-    // Page Navigation System with History
-    let pageHistory = ['home'];
-
-    function showPage(pageId) {
-        // If same page, do nothing
-        if (pageHistory[pageHistory.length - 1] === pageId) return;
-        
-        // Hide all pages
-        document.querySelectorAll('.page-content').forEach(page => {
-            page.classList.remove('active');
-        });
-        
-        // Show selected page
-        const targetPage = document.getElementById(pageId);
-        if (targetPage) {
-            targetPage.classList.add('active');
-        } else {
-            document.getElementById('home').classList.add('active');
-            pageId = 'home';
-        }
-        
-        // Update active navigation
-        document.querySelectorAll('.nav-menu a').forEach(link => {
-            link.classList.remove('active');
-        });
-        
-        // Find and activate the corresponding nav link
-        const activeLink = document.querySelector(`.nav-menu a[href="#${pageId}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
-        
-        // Add to history (avoid duplicates)
-        if (pageHistory[pageHistory.length - 1] !== pageId) {
-            pageHistory.push(pageId);
-        }
-        
-        // Update browser URL
-        window.history.pushState({ pageId: pageId }, '', `#${pageId}`);
-        
-        // Close mobile menu
-        if (window.innerWidth <= 768) {
-            document.querySelector('.nav-menu').classList.remove('active');
-            document.querySelectorAll('.dropdown').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector('.mobile-toggle i').className = 'fas fa-bars';
-        }
-        
-        // Scroll to top
-        window.scrollTo(0, 0);
-    }
-
-    function showPageFromHistory(pageId) {
-        // Hide all pages
-        document.querySelectorAll('.page-content').forEach(page => {
-            page.classList.remove('active');
-        });
-        
-        // Show selected page
-        const targetPage = document.getElementById(pageId);
-        if (targetPage) {
-            targetPage.classList.add('active');
-        } else {
-            document.getElementById('home').classList.add('active');
-            pageId = 'home';
-        }
-        
-        // Update active navigation
-        document.querySelectorAll('.nav-menu a').forEach(link => {
-            link.classList.remove('active');
-        });
-        
-        const activeLink = document.querySelector(`.nav-menu a[href="#${pageId}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
-        
-        // Update history array
-        if (pageHistory[pageHistory.length - 1] !== pageId) {
-            pageHistory.push(pageId);
-        }
-        
-        // Scroll to top
-        window.scrollTo(0, 0);
-    }
-
-    // Handle browser back/forward buttons
-    window.addEventListener('popstate', function(event) {
-        let pageId = 'home';
-        
-        if (event.state && event.state.pageId) {
-            pageId = event.state.pageId;
-        } else {
-            const hash = window.location.hash.replace('#', '');
-            if (hash && document.getElementById(hash)) {
-                pageId = hash;
-            }
-        }
-        
-        showPageFromHistory(pageId);
-    });
-
-    // Set up navigation for all links
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetPage = this.getAttribute('href').replace('#', '');
-            showPage(targetPage);
-        });
-    });
-
-    // Language items navigation
-    document.querySelectorAll('.language-item').forEach(item => {
-        item.addEventListener('click', function() {
-            const page = this.getAttribute('data-page');
-            if (page) {
-                showPage(page);
-            }
-        });
-    });
-
-    // Hero background rotation
-    const heroSection = document.getElementById('hero');
-    if (heroSection) {
-        const languageBackgrounds = [
-            'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1489389944381-3471b5b30f04?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1598974357801-cbca100e65d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1518894788259-121cc36afec9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1502602898536-47ad22581b52?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80',
-            'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80'
-        ];
-
-        let currentBgIndex = 0;
-        
-        function rotateBackground() {
-            currentBgIndex = (currentBgIndex + 1) % languageBackgrounds.length;
-            heroSection.style.backgroundImage = `linear-gradient(rgba(44, 90, 160, 0.8), rgba(44, 90, 160, 0.9)), url('${languageBackgrounds[currentBgIndex]}')`;
-        }
-
-        // Change background every 8 seconds
-        setInterval(rotateBackground, 8000);
-    }
-
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            document.querySelector('.nav-menu').classList.remove('active');
-            document.querySelectorAll('.dropdown').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector('.mobile-toggle i').className = 'fas fa-bars';
-        }
-    });
-
-    // Form submission
-    const quoteForm = document.getElementById('quoteForm');
-    if (quoteForm) {
-        quoteForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = new FormData(this);
-            const name = formData.get('name');
-            const mobile = formData.get('mobile');
-            const email = formData.get('email');
-            const service = formData.get('service');
-            const languageFrom = formData.get('language-from');
-            const languageTo = formData.get('language-to');
-            const message = formData.get('message');
-            
-            // Create email content
-            const subject = `New Translation Quote Request from ${name}`;
-            const body = `
-Name: ${name}
-Mobile: ${mobile}
-Email: ${email}
-Service Needed: ${service}
-Translate From: ${languageFrom}
-Translate To: ${languageTo}
-Message: ${message}
-            `;
-            
-            // Create mailto link
-            const mailtoLink = `mailto:translationservicespk@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            
-            // Open email client
-            window.location.href = mailtoLink;
-            
-            // Show success message
-            const successMessage = document.getElementById('successMessage');
-            if (successMessage) {
-                successMessage.style.display = 'block';
-            }
-            
-            // Reset form
-            this.reset();
-            
-            // Hide success message after 5 seconds
-            setTimeout(() => {
-                if (successMessage) {
-                    successMessage.style.display = 'none';
-                }
-            }, 5000);
-        });
-    }
-
-    // Initialize the website
-    document.addEventListener('DOMContentLoaded', function() {
-        // Check if we have a hash in URL
-        const hash = window.location.hash.replace('#', '');
-        if (hash && document.getElementById(hash)) {
-            showPageFromHistory(hash);
-        } else {
-            showPageFromHistory('home');
-        }
-        
-        // Add click event to logo for home navigation
-        const logo = document.querySelector('.logo');
-        if (logo) {
-            logo.addEventListener('click', function() {
-                showPage('home');
-            });
-            logo.style.cursor = 'pointer';
-        }
-    });
-    // Enhanced resize handler
-let resizeTimeout;
-window.addEventListener('resize', function() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(function() {
-        if (window.innerWidth > 768) {
-            // Close mobile menu on desktop
-            const navMenu = document.querySelector('.nav-menu');
-            const mobileToggle = document.querySelector('.mobile-toggle');
-            
-            if (navMenu.classList.contains('active')) {
-                navMenu.classList.remove('active');
-                mobileToggle.querySelector('i').className = 'fas fa-bars';
-            }
-            
-            // Reset dropdowns
-            document.querySelectorAll('.dropdown').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-                dropdown.style.display = '';
-            });
-        }
-    }, 250);
-});
-</script>
 </body>
 </html>
